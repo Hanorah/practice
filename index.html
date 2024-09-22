@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #1bd2b6;
+            color: white;
+            overscroll-behavior: contain;
+            --cat-color: #9febf8;
+            --dark: #703110;
+        }
+
+        .wrapper {
+            position: absolute;
+            height: 100dvh;
+            width: 100dvw;
+            overflow: hidden;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cat {
+            position: absolute;
+            --h: 60px;
+            height: var(--h);
+            width: 50px;
+            background-color: var(--cat-color);
+            transition: transform 0.9s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .panel {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            transition: transform 0.9s;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .back {
+            top: -25px;
+            border-radius: 50%;
+            background-color: var(--cat-color);
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .ears-wrapper {
+            bottom: -15px;
+            z-index: 2;
+        }
+
+        .front {
+            bottom: -25px;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .face {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAKlJREFUSEvFltENwCAIRMsIXaWbdZJu1lU6Ak1NMIqKEoX6K8fLoSiwDSxExFYYAEAvhRggJeeJJVgVokk+AisgMwACclcZZAWgBoqQlQAO8oNYuEjdBCfmEEtAdMMh57GHvet+eo1c7Le0kEIoiNQakKT1h3wOzMulPoRBQVYuScNrrrkcPn3i0oxUIoumpCff74G0cJN+XP4/4wpHtYHiv2mFN+Xs3PUCiD9+/hPRnGEAAAAASUVORK5CYII=);
+            --w: 25px;
+            --h: 25px;
+        }
+
+        .ears {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAbCAYAAACJISRoAAAAAXNSR0IArs4c6QAAAHVJREFUSEvtk0sKwDAIROP9D23IwmJNEF5b6Gayykfn4WhspOXuvo5mZvme7E8al1g8ZkEC6/JbSAA72Em85v1XCbGp9itXFjpbJW8AAazNv0G+AGTQVgkZUxr7+D8QkCDErSG7ZBdyAAVrumQXcgAFa7qQXRMPMDgcoxhOHAAAAABJRU5ErkJggg==);
+            --w: 25px;
+            --h: 27px;
+        }
+
+        .pix {
+            width: calc(var(--w) * 2);
+            height: calc(var(--h) * 2);
+            background-size: calc(var(--w) * 2) calc(var(--h) * 2);
+            transition: transform 0.9s;
+            image-rendering: pixelated;
+        }
+
+        .back .tail {
+            display: none;
+            --w: 25px;
+            --h: 25px;
+        }
+
+        .cat.flip .face {
+            display: none;
+        }
+
+        .cat.flip .front {
+            border-radius: 50%;
+            background-color: var(--cat-color);
+            z-index: 1;
+        }
+
+        .cat.flip .ears {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAbCAYAAACJISRoAAAAAXNSR0IArs4c6QAAAHxJREFUSEtjZEAC81//+A/iJopyMCKLk8LGZgbcMJgksoGkWIZPP15LYBbiswyb4ej6Bs4npAQTenwh+wxmDoZPKLEAZiF65KNYQg0LkC3C8AkpyZRUtWTnB1IsGrWElNBiGA2u0eAiKQRIUjyaukaDi6QQIEnxaOoiKbgArwk4HK85LucAAAAASUVORK5CYII=);
+        }
+
+        .cat.flip .back {
+            z-index: 3;
+        }
+
+        .cat.flip .back .tail {
+            display: block;
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAMJJREFUSEvN1tENgCAMBFA7gqu4mZO4mas4AqYmEKy05QSM/Kp9XCItNFWsEELQXiMi8kqYL1jFZWELKyJI8RrsgbQAEZSpbkgPoAQlpCcgoe+QESnyNFeS4chIIKX5DbIu87Tth9c91OfkJWkFWDaRHsBrBMXhJChwJbHOSakginCzhBHeFAIlBE1TC8UQboO0du0leiC90+SDq3oy8q555SdfS2JOxtgXrC4QMQlqozf9wlrT8VpO/h18W5Fo673rBGwgn/7FATxCAAAAAElFTkSuQmCC);
+        }
+
+        .indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+        }
+
+        .cat {
+            animation: squidge infinite 3s;
+            --offset: 10px;
+        }
+
+        .cat.walk {
+            animation: squidge infinite 1s;
+            --offset: 20px;
+        }
+
+        @keyframes squidge {
+
+            0%,
+            100% {
+                height: calc(var(--h) - var(--offset));
+            }
+
+            50% {
+                height: var(--h);
+            }
+        }
+
+        .sign {
+            position: absolute;
+            color: white;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="cat">
+            <div class="front panel">
+                <div class="img face pix"></div>
+            </div>
+            <div class="ears-wrapper panel">
+                <div class="img ears pix"></div>
+            </div>
+            <div class="back panel">
+                <div class="img tail pix"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const wrapper = document.querySelector('.wrapper')
+
+        const cat = {
+            el: document.querySelector('.cat'),
+            front: document.querySelector('.front'),
+            back: document.querySelector('.back'),
+            images: {
+                els: document.querySelectorAll('.img'),
+                deg: 0
+            },
+            panels: document.querySelectorAll('.panel'),
+            deg: 0,
+            x: 0,
+            y: 0,
+            roll: {
+                x: 0,
+                y: 0,
+            },
+            isWalking: false,
+            idleCount: 4,
+            spinDeg: 45
+        }
+
+        const px = n => `${n}px`
+
+        const setStyles = ({ el, x, y, deg }) => {
+            el.style.transform = `translate(${x ? px(x) : 0}, ${y ? px(y) : 0}) rotate(${deg || 0}deg)`
+        }
+
+        const nearest360 = deg => {
+            const nearestN = n => (n - 1) + Math.abs(((n - 1) % 360) - 360)
+            if (deg < 0) {
+                return -nearestN(deg * -1)
+            }
+            return deg === 0 ? 0 : nearestN(deg)
+        }
+
+        const moduloN = (deg, n) => {
+            if (deg < 0) {
+                return (deg % n) + n
+            }
+            return deg % n
+        }
+
+        const rotateX = ({ el, deg }) => {
+            const zKey = {
+                0: -deg,
+                45: -deg,
+                90: -deg,
+                135: -deg + 90,
+                180: -deg + 180,
+                225: -deg - 90,
+                270: -deg,
+                315: -deg,
+                360: -deg
+            }
+            el.style.transform = `rotateX(${deg}deg) rotateZ(${zKey[moduloN(deg, 360)]}deg)`
+        }
+
+        const addEvents = (target, event, action, array) => {
+            array.forEach(a => event === 'remove' ? target.removeEventListener(a, action) : target.addEventListener(a, action))
+        }
+
+        const mouse = {
+            up: (t, e, a) => addEvents(t, e, a, ['mouseup', 'touchend']),
+            move: (t, e, a) => addEvents(t, e, a, ['mousemove', 'touchmove']),
+            down: (t, e, a) => addEvents(t, e, a, ['mousedown', 'touchstart']),
+            enter: (t, e, a) => addEvents(t, e, a, ['mouseenter', 'touchstart']),
+            leave: (t, e, a) => addEvents(t, e, a, ['mouseleave'])
+        }
+
+        const drag = (el, pos, x, y) => {
+            pos.a.x = pos.b.x - x
+            pos.a.y = pos.b.y - y
+            const newX = el.offsetLeft - pos.a.x
+            const newY = el.offsetTop - pos.a.y
+            const rollD = 7
+            cat.roll.x = newX > el.offsetLeft ? -rollD : rollD
+            cat.roll.y = newY > el.offsetTop ? -rollD : rollD
+        }
+
+        const client = (e, type) => e.type[0] === 'm' ? e[`client${type}`] : e.touches[0][`client${type}`]
+        const roundedClient = (e, type) => Math.round(client(e, type))
+
+        const addTouchAction = el => {
+            const pos = {
+                a: { x: 0, y: 0 },
+                b: { x: 0, y: 0 },
+            }
+            const onGrab = e => {
+                cat.idleCount = 4
+                pos.b.x = roundedClient(e, 'X')
+                pos.b.y = roundedClient(e, 'Y')
+                mouse.up(document, 'add', onLetGo)
+                mouse.move(document, 'add', onDrag)
+            }
+            const onDrag = e => {
+                const x = roundedClient(e, 'X')
+                const y = roundedClient(e, 'Y')
+                drag(el, pos, x, y)
+                pos.b.x = x
+                pos.b.y = y
+                roll(e)
+            }
+            const onLetGo = () => {
+                mouse.up(document, 'remove', onLetGo)
+                mouse.move(document, 'remove', onDrag)
+            }
+            mouse.down(el, 'add', onGrab)
+        }
+
+        const rollCatImage = () => {
+            cat.images.els.forEach(el => setStyles({ el, deg: cat.images.deg }))
+        }
+
+        const getBound = () => {
+            const { width, height } = wrapper.getBoundingClientRect()
+            return {
+                x: (width / 2) - 100,
+                y: (height / 2) - 100
+            }
+        }
+
+        const isOutsideBound = () => {
+            const bound = getBound()
+
+            return cat.x < -bound.x ||
+                cat.x > bound.x ||
+                cat.y > bound.y ||
+                cat.y < -bound.y
+        }
+
+        const roll = () => {
+            const { roll } = cat
+            // angle: -
+            if (moduloN(cat.deg, 180) === 90) {
+                cat.y -= roll.y
+                // angle: |
+            } else if ([0, 180].includes(moduloN(cat.deg, 180))) {
+                cat.x -= roll.x
+            } else {
+                //  angle: \
+                if (moduloN(cat.deg, 180) === 135
+                    && (
+                        (roll.x < 0 && roll.y > 0) ||
+                        (roll.x > 0 && roll.y < 0)
+                    )) {
+                    cat.x -= roll.x
+                    cat.y -= roll.y
+                }
+                //  angle: /
+                if (moduloN(cat.deg, 180) === 45
+                    && (
+                        (roll.x > 0 && roll.y > 0) ||
+                        (roll.x < 0 && roll.y < 0)
+                    )) {
+                    cat.x -= roll.x
+                    cat.y -= roll.y
+                }
+            }
+
+            setStyles(cat)
+            const diff = moduloN(cat.deg, 180) === 90
+                ? roll.y * 3
+                : roll.x * 3
+
+            const normalisedAngle = moduloN(cat.deg, 360)
+            cat.images.deg += normalisedAngle > 90 && normalisedAngle <= 270 ? diff : -diff
+            rollCatImage()
+        }
+
+        const walk = () => {
+            cat.images.deg = nearest360(cat.images.deg)
+            rollCatImage()
+
+            const d = isOutsideBound() ? 60 : 20
+            const distanceKey = {
+                0: { x: 0, y: d },
+                45: { x: -d, y: d },
+                90: { x: -d, y: 0 },
+                135: { x: -d, y: -d },
+                180: { x: 0, y: -d },
+                225: { x: d, y: -d },
+                270: { x: d, y: 0 },
+                315: { x: d, y: d },
+                360: { x: 0, y: d },
+            }
+
+            const bound = getBound()
+            const distance = distanceKey[moduloN(cat.deg, 360)]
+            let shouldSpin
+            if (
+                distance.x < 0 && (cat.x + distance.x > -bound.x) ||
+                distance.x > 0 && (cat.x + distance.x < bound.x)
+            ) {
+                cat.x += distance.x
+            } else {
+                shouldSpin = true
+            }
+
+            if (
+                distance.y < 0 && (cat.y + distance.y > -bound.y) ||
+                distance.y > 0 && (cat.y + distance.y < bound.y)
+            ) {
+                cat.y += distance.y
+            } else {
+                shouldSpin = true
+            }
+
+            shouldSpin
+                ? spin()
+                : setStyles(cat)
+        }
+
+        const spin = () => {
+            cat.deg += cat.spinDeg
+            cat.el.style.setProperty('--h', px(
+                moduloN(cat.deg, 180) === 90
+                    ? 100
+                    : moduloN(cat.deg, 180) === 0
+                        ? 60
+                        : 80
+            ))
+
+            setStyles(cat)
+            cat.panels.forEach(el => {
+                rotateX({ el, deg: cat.deg })
+            })
+
+            const normalisedAngle = moduloN(cat.deg, 360)
+            let action
+
+            if (cat.spinDeg === 45) {
+                action = normalisedAngle > 90 && normalisedAngle <= 270
+                    ? 'add'
+                    : 'remove'
+            } else {
+                action = normalisedAngle >= 90 && normalisedAngle < 270
+                    ? 'add'
+                    : 'remove'
+            }
+            cat.el.classList[action]('flip')
+        }
+
+        addTouchAction(cat.el)
+            ;[cat.front, cat.back].forEach(el => {
+                el.addEventListener('click', spin)
+            })
+
+        setInterval(() => {
+            cat.idleCount = isOutsideBound() ? -1 : cat.idleCount - 1
+
+            if (cat.idleCount < 0) {
+                cat.el.classList.add('walk')
+                walk()
+                if (cat.idleCount < -10) {
+                    cat.spinDeg *= -1
+                    cat.idleCount = 4
+                }
+            } else {
+                cat.el.classList.remove('walk')
+            }
+        }, 1000)
+    </script>
+</body>
+
+</html>
